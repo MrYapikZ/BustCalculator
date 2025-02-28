@@ -1,12 +1,9 @@
-from PyQt5.QtWidgets import QMainWindow, QApplication, QCheckBox, QDialogButtonBox, QVBoxLayout, QWidget, QComboBox, QLabel, QFileDialog, QPushButton, QToolButton, QMessageBox, QAbstractItemView
+from PyQt5.QtWidgets import QMainWindow, QApplication, QFileDialog, QMessageBox, QSystemTrayIcon
 from PyQt5.uic import loadUi
-from PyQt5.QtCore import Qt
+from PyQt5.QtCore import Qt, QTimer, QUrl
 from PyQt5 import QtGui, QtWidgets, QtCore
 from typing import List, Optional, Tuple
-from PyQt5.QtGui import QPixmap
-import textwrap
-import subprocess
-import json
+from PyQt5.QtGui import QPixmap, QIcon, QDesktopServices
 import sys
 import csv
 import os
@@ -14,6 +11,7 @@ import re
 import cv2
 import numpy as np
 import matplotlib.pyplot as plt
+import resource_qrc
 
 from main_ui import Ui_MainWindow
 
@@ -23,6 +21,15 @@ class MainUI(QMainWindow, Ui_MainWindow):
         self.setupUi(self)
 
         self.setWindowTitle("Bust Calculator")
+        self.setWindowIcon(QIcon(":/img/icon.ico"))
+
+        # Create a tray icon
+        self.tray_icon = QSystemTrayIcon(QIcon(":/img/icon.ico"), self)
+        self.tray_icon.setVisible(True)
+
+        self.tray_icon.show()
+
+        QTimer.singleShot(5000, self.show)
 
         self.resize(500, 500)
         self.max_size = 800
@@ -33,7 +40,13 @@ class MainUI(QMainWindow, Ui_MainWindow):
         self.toolButton_locateImage.clicked.connect(self.locate_image)
         self.pushButton_generate.clicked.connect(self.generate)
 
+        self.label.mouseDoubleClickEvent = self.open_website
+
 # PyQt Program =========================================================================================================
+    def open_website(self, event):
+        if event.button() == Qt.LeftButton:
+            QDesktopServices.openUrl(QUrl("https://www.expiproject.com/"))  # Open URL
+
     def locate_image(self):
         imagePath, _ = QFileDialog.getOpenFileName(
             None,  # Parent window (None if standalone)
